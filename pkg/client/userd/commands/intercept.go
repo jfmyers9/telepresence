@@ -993,7 +993,7 @@ func (is *interceptState) writeEnvToFileAndClose(file *os.File) (err error) {
 		if err = w.WriteByte('='); err != nil {
 			return err
 		}
-		if _, err = w.WriteString(is.env[k]); err != nil {
+		if _, err = w.WriteString(escapeEnv(is.env[k])); err != nil {
 			return err
 		}
 		if err = w.WriteByte('\n'); err != nil {
@@ -1001,6 +1001,13 @@ func (is *interceptState) writeEnvToFileAndClose(file *os.File) (err error) {
 		}
 	}
 	return w.Flush()
+}
+
+func escapeEnv(v string) string {
+	if !strings.Contains(v, "\n") {
+		return v
+	}
+	return fmt.Sprintf("\"%s\"", strings.ReplaceAll(v, "\n", "\\n"))
 }
 
 func (is *interceptState) writeEnvJSON() error {
